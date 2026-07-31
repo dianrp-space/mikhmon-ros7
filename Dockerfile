@@ -12,7 +12,8 @@ WORKDIR /var/www/html
 COPY src/ /opt/mikhmon/
 
 RUN chown -R www-data:www-data /var/www/html \
-    && a2enmod rewrite
+    && a2enmod rewrite \
+    && echo "ServerName mikhmon.local" >> /etc/apache2/apache2.conf
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
