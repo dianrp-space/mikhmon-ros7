@@ -26,11 +26,11 @@ lewat aaPanel. Lebih ringan daripada image Docker (~500MB).
 ### 2. Buat site
 
 1. aaPanel → **Websites** → **Add Site**
-2. Domain: isi domain atau IP (mis. `mikhmon.drpnet.my.id`)
+2. Domain: `betumonga.dianrp.com`
 3. PHP version: pilih PHP 8.x yang tadi
 4. **Create**
 
-Catatan lokasi default: `/www/wwwroot/<domain>` (contoh: `/www/wwwroot/mikhmon`).
+Lokasi webroot otomatis: `/www/wwwroot/betumonga.dianrp.com`.
 
 ### 3. Upload kode
 
@@ -38,20 +38,20 @@ Copy isi folder `src/` dari repo ini ke webroot:
 
 ```bash
 # contoh: repo diclone di /tmp/mikhmon
-rsync -a /tmp/mikhmon/src/ /www/wwwroot/mikhmon/
+rsync -a /tmp/mikhmon/src/ /www/wwwroot/betumonga.dianrp.com/
 ```
 
 Atau via aaPanel **File** → upload hasil `git archive` / zip isi `src/`.
 
 > Gunakan **isi** folder `src/`, bukan folder `src/`-nya — supaya `index.php`
-> langsung berada di webroot, bukan di `/www/wwwroot/mikhmon/src/`.
+> langsung berada di webroot, bukan di `/www/wwwroot/betumonga.dianrp.com/src/`.
 
 ### 4. Set permission
 
 ```bash
-chown -R www:www /www/wwwroot/mikhmon
-chmod -R 755 /www/wwwroot/mikhmon
-chmod 775 /www/wwwroot/mikhmon/data   # folder DB SQLite harus writable
+chown -R www:www /www/wwwroot/betumonga.dianrp.com
+chmod -R 755 /www/wwwroot/betumonga.dianrp.com
+chmod 775 /www/wwwroot/betumonga.dianrp.com/data   # folder DB SQLite harus writable
 ```
 
 ### 5. Setup cron sync report
@@ -65,13 +65,13 @@ Di aaPanel: **Cron** → **Add Cron Task** → Script (Shell).
 Script (ganti `<ver>` dengan versi PHP aaPanel, mis. `81`, dan path webroot):
 
 ```bash
-/www/server/php/<ver>/bin/php /www/wwwroot/mikhmon/process/syncreport.php >> /www/wwwroot/mikhmon/data/sync.log 2>&1
+/www/server/php/<ver>/bin/php /www/wwwroot/betumonga.dianrp.com/process/syncreport.php >> /www/wwwroot/betumonga.dianrp.com/data/sync.log 2>&1
 ```
 
 Contoh lengkap dengan PHP 8.1:
 
 ```bash
-/www/server/php/81/bin/php /www/wwwroot/mikhmon/process/syncreport.php >> /www/wwwroot/mikhmon/data/sync.log 2>&1
+/www/server/php/81/bin/php /www/wwwroot/betumonga.dianrp.com/process/syncreport.php >> /www/wwwroot/betumonga.dianrp.com/data/sync.log 2>&1
 ```
 
 ### 6. Akses
@@ -89,7 +89,7 @@ Buka `http://<domain>/` di browser.
 | --- | --- | --- |
 | Kode | disync dari image ke volume, file runtime dipertahankan | copy sekali, edit langsung di webroot |
 | Update | `git push` → VPS `pull && up -d` | tarik kode baru lalu overwrite webroot (file runtime: `include/config.php`, `lang`, `theme`, `quickbt`, `img/`, `voucher/*.php`, `data/` dipertahankan) |
-| DB SQLite | di volume | di `/www/wwwroot/mikhmon/data/mikhmon.db` (wajib writable) |
+| DB SQLite | di volume | di `/www/wwwroot/betumonga.dianrp.com/data/mikhmon.db` (wajib writable) |
 | Cron | bawaan image | cron aaPanel |
 
 ## Troubleshooting
