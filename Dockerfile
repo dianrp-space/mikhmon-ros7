@@ -1,7 +1,19 @@
-FROM php:7.4-cli-alpine
-RUN apk update
-RUN apk add git
-RUN git clone https://github.com/achillecisco/mikhmonv7.13.5 src
-WORKDIR src
-ENTRYPOINT ["php"]
-CMD ["-S", "0.0.0.0:80", "-t", "/src/src/"]
+FROM php:8.3-apache
+
+RUN docker-php-ext-install sockets \
+    && docker-php-ext-enable sockets
+
+WORKDIR /var/www/html
+
+COPY src/ /var/www/html/
+
+RUN chown -R www-data:www-data /var/www/html \
+    && a2enmod rewrite
+
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["apache2-foreground"]
