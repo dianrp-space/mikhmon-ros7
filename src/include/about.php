@@ -23,22 +23,6 @@ if (!isset($_SESSION["mikhmon"])) {
 } else {
 }
 ?>
-<style>
-.iFWrapper {
-	position: relative;
-	padding-bottom: 56.25%; /* 16:9 */
-	padding-top: 25px;
-	height: 0;
-}
-.iFWrapper iframe {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-  height: 100%;
-  border :none;
-}
-</style>
 <div class="row">
   <div class="col-12">
     <div class="card">
@@ -48,25 +32,25 @@ if (!isset($_SESSION["mikhmon"])) {
       <div class="card-body">
         <h3>mikhmon <?= $_SESSION['v']; ?></h3>
 <p>
-  Aplikasi ini dipersembahkan untuk pengusaha hotspot di manapun Anda berada.
-  Semoga makin sukses.
+  Mikhmon (MikroTik Hotspot Monitor) adalah aplikasi manajemen voucher hotspot
+  berbasis web. Versi ini dioptimalkan untuk RouterOS v7 dan dikemas dalam Docker.
 </p>
 <p>
   <ul>
     <li>
-      Author : Laksamadi Guko
+      Author asli : Laksamadi Guko
     </li>
     <li>
-      Licence : <a href="https://github.com/laksa19/mikhmonv2/blob/master/LICENSE">GPLv2</a>
+      Lisensi : <a href="https://github.com/laksa19/mikhmonv2/blob/master/LICENSE">GPLv2</a>
     </li>
     <li>
       API Class : <a href="https://github.com/BenMenking/routeros-api">routeros-api</a>
     </li>
     <li>
-      Website : <a href="https://laksa19.github.io">laksa19.github.io</a>
+      Website asli : <a href="https://laksa19.github.io">laksa19.github.io</a>
     </li>
     <li>
-      Facebook : <a href="https://fb.com/laksamadi">fb.com/laksamadi</a>
+      Modifikasi : <a href="https://dianrp.com" target="_blank">dianrp.com</a>
     </li>
   </ul>
 </p>
@@ -74,7 +58,7 @@ if (!isset($_SESSION["mikhmon"])) {
   Terima kasih untuk semua yang telah mendukung pengembangan MIKHMON.
 </p>
 <div>
-    <i>Copyright &copy; <i> 2018 Laksamadi Guko</i></i>
+    <i>Copyright &copy; 2018 Laksamadi Guko</i>
 </div>
 </div>
 </div>
@@ -85,9 +69,13 @@ if (!isset($_SESSION["mikhmon"])) {
   <h3><i class="fa fa-info-circle"></i> Changelog</h3>
   </div>
   <div class="card-body">
-  <div class="iFWrapper">
-    <iframe src="https://laksa19.github.io/mikhmonv3" ></iframe>
-  </div>
+  <ul>
+    <li><b>Report penjualan SQLite</b> - data penjualan disimpan di SQLite dan di-sync otomatis dari router, tidak lagi menumpuk sebagai script.</li>
+    <li><b>Analitik laporan penjualan</b> - kartu statistik (omzet, rata-rata, pertumbuhan, perangkat unik) dan grafik penjualan harian, profil terlaris, serta pelanggan terbanyak.</li>
+    <li><b>Dukungan port API kustom</b> - koneksi RouterOS melalui port forwarding / VPN (format <code>host:port</code>).</li>
+    <li><b>Docker production-ready</b> - berbasis <code>php:8.3-apache</code>, volume persisten, healthcheck, dan cron sync.</li>
+    <li><b>Rebranding</b> - logo, favicon, dan teks modifikasi mengarah ke dianrp.com.</li>
+  </ul>
   </div>
 </div>
 </div>

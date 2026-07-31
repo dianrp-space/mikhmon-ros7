@@ -60,6 +60,9 @@ session_start();
       </center>
     </div>
   </div>
+  <div class="text-center" style="margin-top: 15px;">
+    <a href="https://dianrp.com" target="_blank">Modified by dianrp.com</a>
+  </div>
 </div>
 
 </body>
