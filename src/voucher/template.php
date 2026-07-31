@@ -3,18 +3,18 @@
 // Copier coller ce code dans [Settings -> Template Editor].
 
 if(substr($validity,-1) == "d"){
-  $validity = "Validité:".substr($validity,0,-1)."Journée";
+  $validity = "Validity:".substr($validity,0,-1)."Day";
 }else if(substr($validity,-1) == "h"){
-  $validity = "Validité:".substr($validity,0,-1)."Heure";
+  $validity = "Validity:".substr($validity,0,-1)."Hour";
 }
 if(substr($timelimit,-1) == "d" & strlen($timelimit) >3){+
-  $timelimit = "Durée:".((substr($timelimit,0,-1)*7) +  substr($timelimit, 2,1))."jour";
+  $timelimit = "Duration:".((substr($timelimit,0,-1)*7) +  substr($timelimit, 2,1))."day";
 }else if(substr($timelimit,-1) == "d"){
-  $timelimit = "Durée:".substr($timelimit,0,-1)."Jour";
+  $timelimit = "Duration:".substr($timelimit,0,-1)."Day";
 }else if(substr($timelimit,-1) == "h"){
-  $timelimit = "Durée:".substr($timelimit,0,-1)."Heure";
+  $timelimit = "Duration:".substr($timelimit,0,-1)."Hour";
 }else if(substr($timelimit,-1) == "w"){
-  $timelimit = "Durée:".(substr($timelimit,0,-1)*7)."Jour";
+  $timelimit = "Duration:".(substr($timelimit,0,-1)*7)."Day";
 }
 
 //CiscoTek Togo. +22892910794 /99313800
@@ -73,7 +73,7 @@ else{ $color = "#FFFFFF";}
       <td style="font-size: 10px;"><?= $validity; ?> <?= $timelimit; ?> <?= $datalimit; ?></td>
     </tr>
     <tr>
-      <td colspan="3" style="font-size: 10px;">Portail: http://<?= $dnsname; ?> <span id="num"> <?= " [$num]"; ?></span></td>
+      <td colspan="3" style="font-size: 10px;">Portal: http://<?= $dnsname; ?> <span id="num"> <?= " [$num]"; ?></span></td>
     </tr>
   </tbody>
 </table>	        	        	        	        	        	        	        	        	        

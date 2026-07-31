@@ -72,6 +72,77 @@ if (!isset($_SESSION["mikhmon"])) {
 		$shf = "text";
 		$shd = "none";
 	}
+
+	$analytics = array(
+		'total' => 0,
+		'count' => 0,
+		'daily' => array(),
+		'profile' => array(),
+		'devices' => array(),
+	);
+	$salesRows = mikhmon_get_sales_rows($session, (strlen($idhr) > 0 ? $idhr : ''), (strlen($idbl) > 0 ? $idbl : ''));
+	foreach ($salesRows as $arow) {
+		if ($prefix != "" && substr($arow['username'], 0, strlen($prefix)) != $prefix) {
+			continue;
+		}
+		$aprice = (float) $arow['price'];
+		$analytics['total'] += $aprice;
+		$analytics['count']++;
+		if (!isset($analytics['daily'][$arow['tdate']])) {
+			$analytics['daily'][$arow['tdate']] = 0;
+		}
+		$analytics['daily'][$arow['tdate']] += $aprice;
+		if (!isset($analytics['profile'][$arow['profile']])) {
+			$analytics['profile'][$arow['profile']] = 0;
+		}
+		$analytics['profile'][$arow['profile']]++;
+		if ($arow['mac'] != "") {
+			if (!isset($analytics['devices'][$arow['mac']])) {
+				$analytics['devices'][$arow['mac']] = 0;
+			}
+			$analytics['devices'][$arow['mac']]++;
+		}
+	}
+	$analytics['unique_users'] = count($analytics['devices']);
+	$analytics['avg'] = $analytics['count'] > 0 ? round($analytics['total'] / $analytics['count']) : 0;
+	ksort($analytics['daily']);
+	arsort($analytics['profile']);
+	arsort($analytics['devices']);
+
+	if ($idbl != '') {
+		$acurMM = substr($idbl, 0, 2);
+		$acurYY = substr($idbl, 2, 4);
+	} elseif ($idhr != '') {
+		$aparts = explode("-", $idhr);
+		$acurMM = isset($aparts[1]) ? $aparts[1] : date('m');
+		$acurYY = isset($aparts[0]) ? $aparts[0] : date('Y');
+	} else {
+		$acurMM = date('m');
+		$acurYY = date('Y');
+	}
+	if ($acurMM == '01') {
+		$aprevMM = '12';
+		$aprevYY = $acurYY - 1;
+	} else {
+		$aprevMM = sprintf("%02d", ((int) $acurMM) - 1);
+		$aprevYY = $acurYY;
+	}
+	$prevTotal = 0;
+	foreach (mikhmon_get_sales_rows($session, '', $aprevMM . $aprevYY) as $prow) {
+		$prevTotal += (float) $prow['price'];
+	}
+	$analytics['growth'] = $prevTotal > 0 ? round((($analytics['total'] - $prevTotal) / $prevTotal) * 100, 1) : ($analytics['total'] > 0 ? 100 : 0);
+	$analytics['prev_total'] = $prevTotal;
+	$isIndo = in_array($currency, $cekindo['indo']);
+	if ($isIndo) {
+		$fmtMoney = function ($n) {
+			return number_format($n, 0, ',', '.');
+		};
+	} else {
+		$fmtMoney = function ($n) {
+			return number_format($n, 2, '.', ',');
+		};
+	}
 	
 }
 ?>
@@ -283,6 +354,110 @@ $(document).ready(function(){
 				}
 			</script>
 		</div>
+<?php
+$adailyDates = array_keys($analytics['daily']);
+$adailyVals = array_values($analytics['daily']);
+$aprofiles = array_slice(array_keys($analytics['profile']), 0, 8);
+$aprofileVals = array_slice(array_values($analytics['profile']), 0, 8);
+$ausers = array_slice(array_keys($analytics['devices']), 0, 8);
+$auserVals = array_slice(array_values($analytics['devices']), 0, 8);
+$hasDevices = count($analytics['devices']) > 0;
+$growthColor = $analytics['growth'] >= 0 ? 'cl-su' : 'cl-sd';
+$growthArrow = $analytics['growth'] >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+$amnames = array(1 => "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+?>
+		  <div class="row">
+			<div class="col-6">
+			  <div class="box bmh-75 box-bordered">
+				<div class="box-group">
+				  <div class="box-group-icon"><i class="fa fa-money"></i></div>
+				  <div class="box-group-area">
+					<span><b><?= $_selling_report ?> (<?= $filedownload ?>)</b><br/>
+					  <span style="font-size: 18px; font-weight: bold;"><?= $currency . ' ' . $fmtMoney($analytics['total']); ?></span><br/>
+					  <small><?= $analytics['count'] ?> <?= $_voucher ?></small>
+					</span>
+				  </div>
+				</div>
+			  </div>
+			</div>
+			<div class="col-6">
+			  <div class="box bmh-75 box-bordered">
+				<div class="box-group">
+				  <div class="box-group-icon"><i class="fa fa-line-chart"></i></div>
+				  <div class="box-group-area">
+					<span><b><?= $amnames[(int) $acurMM] . ' ' . $acurYY; ?> vs <?= $amnames[(int) $aprevMM] . ' ' . $aprevYY; ?></b><br/>
+					  <span style="font-size: 18px; font-weight: bold;" class="<?= $growthColor; ?>"><i class="fa <?= $growthArrow; ?>"></i> <?= $analytics['growth']; ?>%</span><br/>
+					  <small><?= $currency . ' ' . $fmtMoney($analytics['prev_total']); ?> → <?= $currency . ' ' . $fmtMoney($analytics['total']); ?></small>
+					</span>
+				  </div>
+				</div>
+			  </div>
+			</div>
+			<div class="col-6">
+			  <div class="box bmh-75 box-bordered">
+				<div class="box-group">
+				  <div class="box-group-icon"><i class="fa fa-tags"></i></div>
+				  <div class="box-group-area">
+					<span><b><?= $_average ?></b><br/>
+					  <span style="font-size: 18px; font-weight: bold;"><?= $currency . ' ' . $fmtMoney($analytics['avg']); ?></span><br/>
+					  <small><?= $_price ?> / <?= $_voucher ?></small>
+					</span>
+				  </div>
+				</div>
+			  </div>
+			</div>
+			<div class="col-6">
+			  <div class="box bmh-75 box-bordered">
+				<div class="box-group">
+				  <div class="box-group-icon"><i class="fa fa-users"></i></div>
+				  <div class="box-group-area">
+					<span><b><?= $_unique_users ?></b><br/>
+					  <span style="font-size: 18px; font-weight: bold;"><?= $analytics['unique_users']; ?></span><br/>
+					</span>
+				  </div>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		  <div class="row">
+			<div class="col-12" id="chartDaily" style="min-height: 300px;"></div>
+		  </div>
+		  <div class="row">
+			<div class="col-6" id="chartProfile" style="min-height: 300px;"></div>
+			<?php if ($hasDevices) { ?>
+			<div class="col-6" id="chartTopUser" style="min-height: 300px;"></div>
+			<?php } ?>
+		  </div>
+		  <script type="text/javascript">
+$(document).ready(function(){
+  Highcharts.chart('chartDaily', {
+    chart: { type: 'area' },
+    title: { text: '<?= $_daily_sales ?>' },
+    xAxis: { categories: <?= json_encode($adailyDates); ?> },
+    yAxis: { title: { text: '<?= $currency ?>' } },
+    series: [{ name: '<?= $currency ?>', data: <?= json_encode($adailyVals); ?> }],
+    tooltip: { pointFormat: '<?= $currency ?> <b>{point.y}</b>' }
+  });
+  Highcharts.chart('chartProfile', {
+    chart: { type: 'bar' },
+    title: { text: '<?= $_top_profiles ?>' },
+    xAxis: { categories: <?= json_encode($aprofiles); ?> },
+    yAxis: { title: { text: '<?= $_count ?>' } },
+    series: [{ name: '<?= $_count ?>', data: <?= json_encode($aprofileVals); ?> }],
+    tooltip: { pointFormat: '<b>{point.y}</b> <?= $_voucher ?>' }
+  });
+<?php if ($hasDevices) { ?>
+  Highcharts.chart('chartTopUser', {
+    chart: { type: 'bar' },
+    title: { text: '<?= $_top_customers ?>' },
+    xAxis: { categories: <?= json_encode($ausers); ?> },
+    yAxis: { title: { text: '<?= $_count ?>' } },
+    series: [{ name: '<?= $_count ?>', data: <?= json_encode($auserVals); ?> }],
+    tooltip: { pointFormat: '<b>{point.y}</b> <?= $_voucher ?>' }
+  });
+<?php } ?>
+});
+		  </script>
 		  <div class="overflow box-bordered" style="max-height: 70vh">
 			<table id="dataTable" class="table table-bordered table-hover text-nowrap">
 				<thead class="thead-light">

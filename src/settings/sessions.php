@@ -165,7 +165,7 @@ if (!isset($_SESSION["mikhmon"])) {
         </tr>
         
       </table>
-      <div id="loadV">v<?= $_SESSION['v']; ?> </div>
+      <div id="loadV"><?= $_SESSION['v']; ?> </div>
       <div><b id="newVer" class="text-green"></b></div>
     </div>
     </div>

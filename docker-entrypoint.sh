@@ -13,6 +13,13 @@ rsync -a --delete \
     --exclude 'data/' \
     /opt/mikhmon/ /var/www/html/
 
+# Pastikan logo login/favicon (dns_logo.jpg) tersedia di volume,
+# karena folder img/ di-exclude dari rsync di atas.
+if [ -f /opt/mikhmon/img/dns_logo.jpg ]; then
+    mkdir -p /var/www/html/img
+    cp -f /opt/mikhmon/img/dns_logo.jpg /var/www/html/img/dns_logo.jpg
+fi
+
 chown -R www-data:www-data /var/www/html
 
 mkdir -p /var/www/html/data

@@ -27,10 +27,10 @@ session_start();
     </div>
     <div class="card-body">
       <div class="text-center pd-5">
-        <img src="img/favicon.png" alt="MIKHMON Logo">
+        <img src="img/dns_logo.jpg" alt="MIKHMON Logo" width="128" height="128">
       </div>
       <div  class="text-center">
-      <span style="font-size: 25px; margin: 10px;">MIKHMON v7.13.5</span>
+      <span style="font-size: 25px; margin: 10px;">mikhmon</span>
       </div>
       <center>
       <form autocomplete="off" action="" method="post">

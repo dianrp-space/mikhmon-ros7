@@ -35,7 +35,7 @@ error_reporting(0);
 		<!-- Mikhmon UI -->
 		<link rel="stylesheet" href="css/mikhmon-ui.<?= $theme; ?>.min.css">
 		<!-- favicon -->
-		<link rel="icon" href="./img/favicon.png" />
+		<link rel="icon" href="./img/dns_logo.jpg" />
 		<!-- jQuery -->
 		<script src="js/jquery.min.js"></script>
 		<!-- pace -->

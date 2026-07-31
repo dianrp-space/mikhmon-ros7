@@ -111,6 +111,24 @@ function mikhmon_get_sales($session, $source = '', $owner = '')
     return $rows;
 }
 
+function mikhmon_get_sales_rows($session, $source = '', $owner = '')
+{
+    $pdo = mikhmon_pdo();
+    $sql = 'SELECT * FROM sales WHERE session = :session';
+    $params = array(':session' => $session);
+    if ($source != '') {
+        $sql .= ' AND source = :source';
+        $params[':source'] = $source;
+    } elseif ($owner != '') {
+        $sql .= ' AND owner = :owner';
+        $params[':owner'] = $owner;
+    }
+    $sql .= ' ORDER BY id ASC';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function mikhmon_delete_sales($session, $source = '', $owner = '')
 {
     $pdo = mikhmon_pdo();
