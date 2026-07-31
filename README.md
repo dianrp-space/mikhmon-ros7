@@ -77,10 +77,9 @@ volumes:
   mikhmon-data:
 ```
 
-Karena image bersifat **private**, VPS perlu login ke GHCR dengan Personal Access Token (scope `read:packages`):
+Karena repo ini **publik**, image GHCR-nya publik juga — tanpa perlu login:
 
 ```bash
-echo "<PAT>" | docker login ghcr.io -u <username> --password-stdin
 docker compose -f compose.prod.yml pull
 docker compose -f compose.prod.yml up -d
 ```
@@ -101,6 +100,11 @@ Buka browser: `http://localhost:8181`
 - **Password:** `1234`
 
 > **Ganti password default setelah login!** Ada di menu `Admin` -> pengaturan.
+
+## Deploy Alternatif (Tanpa Docker)
+
+Ingin menjalankan langsung di nginx + PHP-FPM tanpa Docker (mis. VPS aaPanel)?
+Lihat [docs/deploy-nginx-aapanel.md](docs/deploy-nginx-aapanel.md).
 
 ## Konfigurasi Router
 
