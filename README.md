@@ -48,6 +48,51 @@ Konfigurasi compose (`docker-compose.yml`):
 - **Restart otomatis** — `restart: unless-stopped`
 - **Timezone** — default `Asia/Jakarta`, bisa diubah lewat env `TZ`
 
+### Deploy via Registry (GHCR) — Tanpa Clone Repo
+
+Image sudah otomatis di-build & di-push ke **GitHub Container Registry** (`ghcr.io/dianrp-space/mikhmon-ros7:latest`) setiap ada push ke `main` (lewat GitHub Actions).
+
+Untuk produksi di VPS, tidak perlu clone repo — cukup satu file `compose.prod.yml`:
+
+```yaml
+services:
+  mikhmon:
+    image: ghcr.io/dianrp-space/mikhmon-ros7:latest
+    container_name: mikhmon
+    ports:
+      - "${HOST_PORT:-8181}:80"
+    volumes:
+      - mikhmon-data:/var/www/html
+    environment:
+      TZ: Asia/Jakarta
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php", "-r", "$$sock=@fsockopen('localhost',80);exit($$sock?0:1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mikhmon-data:
+```
+
+Karena image bersifat **private**, VPS perlu login ke GHCR dengan Personal Access Token (scope `read:packages`):
+
+```bash
+echo "<PAT>" | docker login ghcr.io -u <username> --password-stdin
+docker compose -f compose.prod.yml pull
+docker compose -f compose.prod.yml up -d
+```
+
+Update di kemudian hari cukup:
+
+```bash
+docker compose -f compose.prod.yml pull && docker compose -f compose.prod.yml up -d
+```
+
+Data (sessions, pengaturan, logo, template, database report) tersimpan di volume `mikhmon-data`, sehingga aman saat image di-update.
+
 ## Akses
 
 Buka browser: `http://localhost:8181`
@@ -115,9 +160,11 @@ src/lib/db.php          # Helper SQLite (tabel sales + fungsi baca/hapus/upsert)
 src/process/syncreport.php  # Cron: sync report router -> SQLite -> hapus script
 src/report/*.php        # Halaman report membaca data dari SQLite
 Dockerfile              # Build image berbasis Apache + mod_php
-docker-compose.yml      # Konfigurasi compose
+docker-compose.yml      # Konfigurasi compose (build lokal)
+compose.prod.yml        # Konfigurasi compose produksi (pull dari GHCR, tanpa build)
 docker-entrypoint.sh    # Sync kode ke volume + start cron, lalu jalankan CMD
 crontab                 # Jadwal cron sync report (tiap menit, user www-data)
+.github/workflows/docker-build.yml  # CI: build & push image ke GHCR tiap push ke main
 ```
 
 ## Catatan Teknis

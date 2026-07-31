@@ -1,0 +1,20 @@
+services:
+  mikhmon:
+    image: ghcr.io/dianrp-space/mikhmon-ros7:latest
+    container_name: mikhmon
+    ports:
+      - "${HOST_PORT:-8181}:80"
+    volumes:
+      - mikhmon-data:/var/www/html
+    environment:
+      TZ: Asia/Jakarta
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php", "-r", "$$sock=@fsockopen('localhost',80);exit($$sock?0:1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mikhmon-data:
