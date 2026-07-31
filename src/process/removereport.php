@@ -20,16 +20,15 @@ session_start();
 error_reporting(0);
 
 	if ($removereport != "") {
+		include_once(__DIR__ . '/../lib/db.php');
 		$uids = explode("~", $removereport);
-	
-		$nuids = count($uids);
-	
-		for ($i = 0; $i < $nuids; $i++) {
-	
-			$API->comm("/system/script/remove", array(
-				".id" => "$uids[$i]",
-			));
-	
+		$pdo = mikhmon_pdo();
+		$stmt = $pdo->prepare('DELETE FROM sales WHERE session = :session AND id = :id');
+		foreach ($uids as $uid) {
+			$uid = trim($uid);
+			if (is_numeric($uid)) {
+				$stmt->execute(array(':session' => $session, ':id' => $uid));
+			}
 		}
 		$_SESSION[$session.'idhr'] = "";
 	}

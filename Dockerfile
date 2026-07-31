@@ -1,17 +1,24 @@
 FROM php:8.3-apache
 
-RUN docker-php-ext-install sockets \
-    && docker-php-ext-enable sockets
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libsqlite3-dev cron rsync \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-install sockets pdo_sqlite \
+    && docker-php-ext-enable sockets pdo_sqlite
 
 WORKDIR /var/www/html
 
-COPY src/ /var/www/html/
+COPY src/ /opt/mikhmon/
 
 RUN chown -R www-data:www-data /var/www/html \
     && a2enmod rewrite
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+COPY crontab /etc/cron.d/mikhmon
+RUN chmod 0644 /etc/cron.d/mikhmon
 
 EXPOSE 80
 

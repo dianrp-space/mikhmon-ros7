@@ -37,38 +37,13 @@ if (!isset($_SESSION["mikhmon"])) {
 	$prefix = $_GET['prefix'];
 	
 
-	$gettimezone = $API->comm("/system/clock/print");
-	$timezone = $gettimezone[0]['time-zone-name'];
-	date_default_timezone_set($timezone);
+	include_once(__DIR__ . '/../lib/db.php');
 
 	if (isset($remdata)) {
 		if (strlen($idhr) > "0") {
-			if ($API->connect($iphost, $userhost, decrypt($passwdhost))) {
-				$API->write('/system/script/print', false);
-				$API->write('?source=' . $idhr . '', false);
-				$API->write('=.proplist=.id');
-				$ARREMD = $API->read();
-				for ($i = 0; $i < count($ARREMD); $i++) {
-					$API->write('/system/script/remove', false);
-					$API->write('=.id=' . $ARREMD[$i]['.id']);
-					$READ = $API->read();
-
-				}
-			}
+			mikhmon_delete_sales($session, $idhr, '');
 		} elseif (strlen($idbl) > "0") {
-			if ($API->connect($iphost, $userhost, decrypt($passwdhost))) {
-				$API->write('/system/script/print', false);
-				$API->write('?owner=' . $idbl . '', false);
-				$API->write('=.proplist=.id');
-				$ARREMD = $API->read();
-				for ($i = 0; $i < count($ARREMD); $i++) {
-					$API->write('/system/script/remove', false);
-					$API->write('=.id=' . $ARREMD[$i]['.id']);
-					$READ = $API->read();
-
-				}
-			}
-
+			mikhmon_delete_sales($session, '', $idbl);
 		}
 		echo "<script>window.location='./?report=selling&session=" . $session . "'</script>";
 	}
@@ -79,45 +54,23 @@ if (!isset($_SESSION["mikhmon"])) {
 		$fprefix = "";
 	}
 	if (strlen($idhr) > "0") {
-		if ($API->connect($iphost, $userhost, decrypt($passwdhost))) {
-			$getData = $API->comm("/system/script/print", array(
-				"?source" => "$idhr",
-			));
-			$TotalReg = count($getData);
-		}
+		$getData = mikhmon_get_sales($session, $idhr, '');
+		$TotalReg = count($getData);
 		$filedownload = $idhr;
 		$shf = "hidden";
 		$shd = "inline-block";
 	} elseif (strlen($idbl) > "0") {
-		if ($API->connect($iphost, $userhost, decrypt($passwdhost))) {
-			$getData = $API->comm("/system/script/print", array(
-				"?owner" => "$idbl",
-			));
-			$TotalReg = count($getData);
-		}
+		$getData = mikhmon_get_sales($session, '', $idbl);
+		$TotalReg = count($getData);
 		$filedownload = $idbl;
 		$shf = "hidden";
 		$shd = "inline-block";
-	} elseif ($idhr == "" || $idbl == "") {
-		if ($API->connect($iphost, $userhost, decrypt($passwdhost))) {
-			$getData = $API->comm("/system/script/print", array(
-				"?comment" => "mikhmon",
-			));
-			$TotalReg = count($getData);
-		}
+	} else {
+		$getData = mikhmon_get_sales($session, '', '');
+		$TotalReg = count($getData);
 		$filedownload = "all";
 		$shf = "text";
 		$shd = "none";
-	} elseif (strlen($idbl) > "0" ) {
-		if ($API->connect($iphost, $userhost, decrypt($passwdhost))) {
-			$getData = $API->comm("/system/script/print", array(
-				"?owner" => "$idbl",
-			));
-			$TotalReg = count($getData);
-		}
-		$filedownload = $idbl;
-		$shf = "hidden";
-		$shd = "inline-block";
 	}
 	
 }

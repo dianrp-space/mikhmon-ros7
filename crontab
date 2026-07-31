@@ -1,0 +1,1 @@
+* * * * * www-data /usr/local/bin/php /var/www/html/process/syncreport.php >> /var/www/html/data/sync.log 2>&1

@@ -4,7 +4,8 @@ Mikhmon (MikroTik Hotspot Monitor) untuk RouterOS v7 — dikemas dalam Docker.
 
 ## Fitur
 
-- **No database** — semua data disimpan dalam file konfigurasi
+- **SQLite untuk report penjualan** — data report disimpan di `data/mikhmon.db`, bukan menumpuk sebagai script di router
+- **Auto-sync report** — cron menjalankan `syncreport.php` setiap menit: mengimpor script penjualan dari router ke SQLite, lalu menghapusnya dari router
 - **Web-based** — dikelola lewat browser
 - **Fokus hotspot & voucher** — tidak termasuk manajemen PPP (PPPoE)
 - **Production-ready** — berbasis `php:8.3-apache`
@@ -84,18 +85,46 @@ sg-01.drpnet.my.id:51244
 - Jika tanpa port, otomatis memakai default 8728
 - Mendukung IPv6 dengan format `[::1]:8729`
 
+## Report Penjualan (SQLite)
+
+Secara default Mikhmon menyimpan data penjualan sebagai *script* di router — ini
+menumpuk seiring waktu. Fork ini mengubahnya:
+
+1. **On-login tetap membuat script** di router (format nama `tanggal-|-jam-|-user-|-harga-|-address-|-mac-|-validity-|-profile-|-comment`, comment `mikhmon`)
+2. **Cron tiap menit** menjalankan `process/syncreport.php` untuk tiap sesi:
+   - Membaca semua script ber-comment `mikhmon` dari router
+   - Mengimpor ke tabel `sales` di `data/mikhmon.db` (duplikat diabaikan via UNIQUE)
+   - Menghapus script tersebut dari router (tidak menumpuk)
+3. **Halaman Report** (`selling`, `print`, `livereport`, `removereport`) membaca & menghapus data dari SQLite — tidak lagi lewat API router
+
+Log sinkronisasi ada di `data/sync.log` (satu baris per sesi per menit), contoh:
+
+```
+[2026-07-31 23:53:13] [Remote-Batam] scripts=0 imported=0 removed=0
+[2026-07-31 23:54:13] [Remote-Batam] scripts=1 imported=1 removed=1
+```
+
+Jika ada sesi yang tidak bisa dihubungi, log mencatat `Connection failed` dan sesi
+lain tetap diproses.
+
 ## Arsitektur
 
 ```
-src/                   # Kode sumber aplikasi (di-copy ke image)
-Dockerfile             # Build image berbasis Apache + mod_php
-docker-compose.yml     # Konfigurasi compose
-docker-entrypoint.sh   # Entrypoint: memastikan izin tulis folder aplikasi
+src/                    # Kode sumber aplikasi (di-copy ke /opt/mikhmon di image)
+src/lib/db.php          # Helper SQLite (tabel sales + fungsi baca/hapus/upsert)
+src/process/syncreport.php  # Cron: sync report router -> SQLite -> hapus script
+src/report/*.php        # Halaman report membaca data dari SQLite
+Dockerfile              # Build image berbasis Apache + mod_php
+docker-compose.yml      # Konfigurasi compose
+docker-entrypoint.sh    # Sync kode ke volume + start cron, lalu jalankan CMD
+crontab                 # Jadwal cron sync report (tiap menit, user www-data)
 ```
 
 ## Catatan Teknis
 
 - Berbasis `php:8.3-apache` (Apache + mod_php) — bukan PHP development server, sehingga siap dipakai di produksi
-- Ekstensi `sockets` diaktifkan untuk koneksi API RouterOS
+- Ekstensi `sockets` (koneksi API RouterOS) dan `pdo_sqlite` / `sqlite3` (report SQLite) diaktifkan
+- Kode sumber di-copy ke `/opt/mikhmon` di image; saat container start, `docker-entrypoint.sh` meng-`rsync` kode ke volume `/var/www/html` tapi **menjaga** file runtime (`include/config.php`, `lang`, `theme`, `quickbt`, `img/`, `voucher/*.php`, `data/`) — sehingga pengaturan sesi & template tidak hilang saat image di-rebuild
+- Cron dijalankan dari entrypoint sebagai daemon (`/usr/sbin/cron`), jadwal dari `/etc/cron.d/mikhmon`
 - Tidak memerlukan `.htaccess` / mod_rewrite; Mikhmon murni menggunakan query string
 - Untuk Nginx + PHP-FPM bisa dipakai, tapi tidak wajib untuk beban Mikhmon yang ringan

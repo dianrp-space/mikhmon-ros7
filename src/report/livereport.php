@@ -34,13 +34,7 @@ include('../lang/'.$langid.'.php');
 // load config
   include('../include/config.php');
   include('../include/readcfg.php');
-
-// routeros api
-  include_once('../lib/routeros_api.class.php');
-  include_once('../lib/formatbytesbites.php');
-  $API = new RouterosAPI();
-  $API->debug = false;
-  $API->connect($iphost, $userhost, decrypt($passwdhost));
+  include_once(__DIR__ . '/../lib/db.php');
 
   if ($livereport == "disable") {
     $logh = "457px";
@@ -64,30 +58,17 @@ include('../lang/'.$langid.'.php');
 
     $_SESSION[$session.'idhr'] = $idhr;
 
-   /* $getSRHr = $API->comm("/system/script/print", array(
-      "?source" => "$idhr",
-    ));
-    $TotalRHr = count($getSRHr);
-    $_SESSION[$session.'totalHr'] = $TotalRHr;*/
-    $getSRBl = $API->comm("/system/script/print", array(
-      "?owner" => "$idbl",
-    ));
+    $getSRBl = mikhmon_get_sales($session, '', $idbl);
     $TotalRBl = count($getSRBl);
     $_SESSION[$session.'totalBl'] = $TotalRBl;
-/*
-    for ($i = 0; $i < $TotalRHr; $i++) {
 
-      $tHr += explode("-|-", $getSRHr[$i]['name'])[3];
-
-    }*/
     foreach($getSRBl as $row){
-    
-      if((explode("-|-", $row['name'])[0]) == $idhr){
-         $tHr += explode("-|-", $row['name'])[3];
-         $TotalRHr += count((array)$row['source']); /*Modif line add (array) by github https://github.com/MasKawer*/
- 
+      $getname = explode("-|-", $row['name']);
+      if($getname[0] == $idhr){
+         $tHr += $getname[3];
+         $TotalRHr += 1;
        }
-       $tBl += explode("-|-", $row['name'])[3];
+       $tBl += $getname[3];
 
       if($TotalRHr == ""){
         $TotalRHr = "0";
