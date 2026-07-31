@@ -55,7 +55,7 @@ if (!isset($_SESSION["mikhmon"])) {
       $lock = "";
     }
 
-    $randstarttime = "0".rand(1,5).":".rand(10,59).":".rand(10,59);
+    $randstarttime = date("H:i:s", time() + rand(1, 300));
     $randinterval = "00:02:".rand(10,59);
 
     $parent = ($_POST['parent']);
