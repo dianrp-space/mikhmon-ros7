@@ -1,7 +1,7 @@
 FROM php:8.3-apache
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libsqlite3-dev cron rsync \
+    && apt-get install -y --no-install-recommends libsqlite3-dev cron rsync logrotate \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install sockets pdo_sqlite \
@@ -19,6 +19,9 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 COPY crontab /etc/cron.d/mikhmon
 RUN chmod 0644 /etc/cron.d/mikhmon
+
+COPY logrotate.d /etc/logrotate.d/mikhmon
+RUN chmod 0644 /etc/logrotate.d/mikhmon
 
 EXPOSE 80
 
