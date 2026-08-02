@@ -359,8 +359,8 @@ $adailyDates = array_keys($analytics['daily']);
 $adailyVals = array_values($analytics['daily']);
 $aprofiles = array_slice(array_keys($analytics['profile']), 0, 8);
 $aprofileVals = array_slice(array_values($analytics['profile']), 0, 8);
-$ausers = array_slice(array_keys($analytics['devices']), 0, 8);
-$auserVals = array_slice(array_values($analytics['devices']), 0, 8);
+$ausers = array_slice(array_keys($analytics['devices']), 0, 100);
+$auserVals = array_slice(array_values($analytics['devices']), 0, 100);
 $hasDevices = count($analytics['devices']) > 0;
 $growthColor = $analytics['growth'] >= 0 ? 'cl-su' : 'cl-sd';
 $growthArrow = $analytics['growth'] >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
@@ -425,7 +425,40 @@ $amnames = array(1 => "January", "February", "March", "April", "May", "June", "J
 		  <div class="row">
 			<div class="col-6" id="chartProfile" style="min-height: 300px;"></div>
 			<?php if ($hasDevices) { ?>
-			<div class="col-6" id="chartTopUser" style="min-height: 300px;"></div>
+			<div class="col-6">
+			  <div class="card">
+				<div class="card-header">
+				  <h3><i class="fa fa-users"></i> <?= $_top_customers ?></h3>
+				</div>
+				<div class="card-body pd-5">
+				  <div class="overflow box-bordered" style="max-height: 40vh;">
+					<table id="dataTableTop" class="table table-bordered table-hover text-nowrap">
+					  <thead class="thead-light">
+						<tr>
+						  <th>&#8470;</th>
+						  <th>MAC</th>
+						  <th style="text-align:right;"><?= $_count ?></th>
+						</tr>
+					  </thead>
+					  <tbody>
+					  <?php
+					  $di = 1;
+					  foreach ($ausers as $aMac) {
+						  $aCount = isset($analytics['devices'][$aMac]) ? $analytics['devices'][$aMac] : 0;
+						  echo "<tr>";
+						  echo "<td>" . $di . "</td>";
+						  echo "<td><span class=\"mac-copy\" title=\"Click to copy\">" . htmlspecialchars($aMac) . "</span> <i class=\"fa fa-copy pointer mac-copy\" title=\"Copy MAC\"></i></td>";
+						  echo "<td style='text-align:right;'>" . $aCount . "</td>";
+						  echo "</tr>";
+						  $di++;
+					  }
+					  ?>
+					  </tbody>
+					</table>
+				  </div>
+				</div>
+			  </div>
+			</div>
 			<?php } ?>
 		  </div>
 		  <script type="text/javascript">
@@ -446,18 +479,17 @@ $(document).ready(function(){
     series: [{ name: '<?= $_count ?>', data: <?= json_encode($aprofileVals); ?> }],
     tooltip: { pointFormat: '<b>{point.y}</b> <?= $_voucher ?>' }
   });
-<?php if ($hasDevices) { ?>
-  Highcharts.chart('chartTopUser', {
-    chart: { type: 'bar' },
-    title: { text: '<?= $_top_customers ?>' },
-    xAxis: { categories: <?= json_encode($ausers); ?> },
-    yAxis: { title: { text: '<?= $_count ?>' } },
-    series: [{ name: '<?= $_count ?>', data: <?= json_encode($auserVals); ?> }],
-    tooltip: { pointFormat: '<b>{point.y}</b> <?= $_voucher ?>' }
-  });
-<?php } ?>
 });
-		  </script>
+$(function(){
+  $(".mac-copy").on("click", function(){
+    var mac = $(this).closest("tr").find("td").eq(1).text().trim();
+    var $tmp = $("<textarea>").val(mac).appendTo("body").select();
+    try { document.execCommand("copy"); } catch(e) {}
+    $tmp.remove();
+    notify("MAC " + mac + " copied");
+  });
+});
+</script>
 		  <div class="overflow box-bordered" style="max-height: 70vh">
 			<table id="dataTable" class="table table-bordered table-hover text-nowrap">
 				<thead class="thead-light">
