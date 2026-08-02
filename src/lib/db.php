@@ -58,6 +58,33 @@ function mikhmon_pdo()
     return $pdo;
 }
 
+function mikhmon_normalize_date($date)
+{
+    $date = trim($date);
+    if (preg_match('#^[0-9]{4}-[0-9]{2}-[0-9]{2}$#', $date)) {
+        return $date;
+    }
+    if (preg_match('#^([a-zA-Z]{3})/([0-9]{2})/([0-9]{4})$#', $date, $m)) {
+        $months = array(
+            'jan' => '01', 'feb' => '02', 'mar' => '03', 'apr' => '04', 'may' => '05', 'jun' => '06',
+            'jul' => '07', 'aug' => '08', 'sep' => '09', 'oct' => '10', 'nov' => '11', 'dec' => '12',
+        );
+        $mon = strtolower($m[1]);
+        if (isset($months[$mon])) {
+            return $m[3] . '-' . $months[$mon] . '-' . $m[2];
+        }
+    }
+    return $date;
+}
+
+function mikhmon_sale_owner($date)
+{
+    if (preg_match('#^([0-9]{4})-([0-9]{2})-[0-9]{2}$#', $date, $m)) {
+        return $m[2] . $m[1];
+    }
+    return '';
+}
+
 function mikhmon_upsert_sale($session, $script)
 {
     $name = isset($script['name']) ? $script['name'] : '';
@@ -65,6 +92,7 @@ function mikhmon_upsert_sale($session, $script)
         return false;
     }
     $parts = explode('-|-', $name);
+    $date = mikhmon_normalize_date(isset($parts[0]) ? $parts[0] : '');
     $pdo = mikhmon_pdo();
     $stmt = $pdo->prepare(
         'INSERT INTO sales (session, source, owner, name, tdate, ttime, username, price, address, mac, validity, profile, comment)
@@ -73,10 +101,10 @@ function mikhmon_upsert_sale($session, $script)
     );
     $stmt->execute(array(
         ':session'  => $session,
-        ':source'   => isset($script['source']) ? $script['source'] : '',
-        ':owner'    => isset($script['owner']) ? $script['owner'] : '',
+        ':source'   => $date,
+        ':owner'    => mikhmon_sale_owner($date),
         ':name'     => $name,
-        ':tdate'    => isset($parts[0]) ? $parts[0] : '',
+        ':tdate'    => $date,
         ':ttime'    => isset($parts[1]) ? $parts[1] : '',
         ':username' => isset($parts[2]) ? $parts[2] : '',
         ':price'    => isset($parts[3]) ? $parts[3] : '',
