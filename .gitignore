@@ -1,1 +1,8 @@
+# Runtime files - local settings, never overwritten by git pull
+/src/include/config.php
+/src/include/lang.php
+/src/include/theme.php
+/src/include/quickbt.php
+
+# SQLite database
 /data/mikhmon.db

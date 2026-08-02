@@ -46,6 +46,19 @@ Atau via aaPanel **File** → upload hasil `git archive` / zip isi `src/`.
 > Gunakan **isi** folder `src/`, bukan folder `src/`-nya — supaya `index.php`
 > langsung berada di webroot, bukan di `/www/wwwroot/betumonga.dianrp.com/src/`.
 
+File runtime (`include/config.php`, `lang.php`, `theme.php`, `quickbt.php`) tidak
+ikut di-repo (ditandai `.example.php`). Untuk instalasi baru, salin dari contoh:
+
+```bash
+cd /www/wwwroot/betumonga.dianrp.com
+for f in config lang theme quickbt; do
+  [ -f "include/$f.php" ] || cp "include/$f.example.php" "include/$f.php"
+done
+```
+
+File-file ini menyimpan pengaturan lokal (login admin + semua session router),
+jadi tidak akan pernah tertimpa saat update kode. Jangan edit versi `.example.php`.
+
 ### 4. Set permission
 
 ```bash
@@ -87,8 +100,9 @@ Buka `http://<domain>/` di browser.
 
 | Aspek | Docker | nginx/aaPanel |
 | --- | --- | --- |
-| Kode | disync dari image ke volume, file runtime dipertahankan | copy sekali, edit langsung di webroot |
-| Update | `git push` → VPS `pull && up -d` | tarik kode baru lalu overwrite webroot (file runtime: `include/config.php`, `lang`, `theme`, `quickbt`, `img/`, `voucher/*.php`, `data/` dipertahankan) |
+| Kode | disync dari image ke volume, file runtime dipertahankan | tarik kode lalu overwrite webroot (file runtime dipertahankan) |
+| Update | `git push` → VPS `pull && up -d` | `git pull` di repo, file runtime (`include/config.php`, `lang`, `theme`, `quickbt`, `img/`, `voucher/*.php`, `data/`) tidak ikut ter-overwrite |
+| File runtime | dibuat dari `.example.php` oleh entrypoint | dibuat manual dari `include/*.example.php` |
 | DB SQLite | di volume | di `/www/wwwroot/betumonga.dianrp.com/data/mikhmon.db` (wajib writable) |
 | Cron | bawaan image | cron aaPanel |
 

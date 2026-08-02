@@ -42,7 +42,10 @@ session_start();
         </tr>
         <tr>
           <td class="align-middle text-center">
-            <input style="width: 100%; height: 35px; font-size: 16px;" class="form-control" type="password" name="pass" placeholder="Password" required="1">
+            <div style="position: relative;">
+              <input style="width: 100%; height: 35px; font-size: 16px;" class="form-control" type="password" name="pass" id="_password" placeholder="Password" required="1">
+              <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #888;" id="_togglePass" title="Show password"><i class="fa fa-eye"></i></span>
+            </div>
           </td>
         </tr>
         <tr>
@@ -64,6 +67,22 @@ session_start();
     <a href="https://dianrp.com" target="_blank">Modified by dianrp.com</a>
   </div>
 </div>
+
+<script>
+$(document).ready(function(){
+  $("#_togglePass").on("click", function(){
+    var pass = $("#_password");
+    var icon = $(this).find("i");
+    if (pass.attr("type") === "password") {
+      pass.attr("type", "text");
+      icon.removeClass("fa-eye").addClass("fa-eye-slash");
+    } else {
+      pass.attr("type", "password");
+      icon.removeClass("fa-eye-slash").addClass("fa-eye");
+    }
+  });
+});
+</script>
 
 </body>
 </html>

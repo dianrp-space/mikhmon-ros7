@@ -176,6 +176,7 @@ crontab                 # Jadwal cron sync report (tiap menit, user www-data)
 - Berbasis `php:8.3-apache` (Apache + mod_php) — bukan PHP development server, sehingga siap dipakai di produksi
 - Ekstensi `sockets` (koneksi API RouterOS) dan `pdo_sqlite` / `sqlite3` (report SQLite) diaktifkan
 - Kode sumber di-copy ke `/opt/mikhmon` di image; saat container start, `docker-entrypoint.sh` meng-`rsync` kode ke volume `/var/www/html` tapi **menjaga** file runtime (`include/config.php`, `lang`, `theme`, `quickbt`, `img/`, `voucher/*.php`, `data/`) — sehingga pengaturan sesi & template tidak hilang saat image di-rebuild
+- File runtime (`include/config.php`, `lang.php`, `theme.php`, `quickbt.php`) **tidak di-track git** — disimpan sebagai `*.example.php`. Docker membuatnya dari contoh saat volume kosong; di deploy nginx salin manual (`cp include/*.example.php include/*.php`). Ini memastikan `git pull` tidak pernah menimpa login admin & session router
 - Cron dijalankan dari entrypoint sebagai daemon (`/usr/sbin/cron`), jadwal dari `/etc/cron.d/mikhmon`
 - Tidak memerlukan `.htaccess` / mod_rewrite; Mikhmon murni menggunakan query string
 - Untuk Nginx + PHP-FPM bisa dipakai, tapi tidak wajib untuk beban Mikhmon yang ringan

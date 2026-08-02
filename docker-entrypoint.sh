@@ -20,6 +20,15 @@ if [ -f /opt/mikhmon/img/dns_logo.jpg ]; then
     cp -f /opt/mikhmon/img/dns_logo.jpg /var/www/html/img/dns_logo.jpg
 fi
 
+# File runtime (settings lokal) tidak ikut rsync. Buat dari contoh jika belum ada,
+# supaya instalasi baru punya nilai default tanpa menimpa pengaturan yang sudah ada.
+for f in config lang theme quickbt; do
+    if [ ! -f "/var/www/html/include/$f.php" ]; then
+        cp -f "/opt/mikhmon/include/$f.example.php" "/var/www/html/include/$f.php"
+        echo "[entrypoint] created /var/www/html/include/$f.php from example"
+    fi
+done
+
 chown -R www-data:www-data /var/www/html
 
 mkdir -p /var/www/html/data
