@@ -447,7 +447,7 @@ $amnames = array(1 => "January", "February", "March", "April", "May", "June", "J
 						  $aCount = isset($analytics['devices'][$aMac]) ? $analytics['devices'][$aMac] : 0;
 						  echo "<tr>";
 						  echo "<td>" . $di . "</td>";
-						  echo "<td><span class=\"mac-copy\" title=\"Click to copy\">" . htmlspecialchars($aMac) . "</span> <i class=\"fa fa-copy pointer mac-copy\" title=\"Copy MAC\"></i></td>";
+						  echo "<td>" . htmlspecialchars($aMac) . "</td>";
 						  echo "<td style='text-align:right;'>" . $aCount . "</td>";
 						  echo "</tr>";
 						  $di++;
@@ -478,15 +478,6 @@ $(document).ready(function(){
     yAxis: { title: { text: '<?= $_count ?>' } },
     series: [{ name: '<?= $_count ?>', data: <?= json_encode($aprofileVals); ?> }],
     tooltip: { pointFormat: '<b>{point.y}</b> <?= $_voucher ?>' }
-  });
-});
-$(function(){
-  $(".mac-copy").on("click", function(){
-    var mac = $(this).closest("tr").find("td").eq(1).text().trim();
-    var $tmp = $("<textarea>").val(mac).appendTo("body").select();
-    try { document.execCommand("copy"); } catch(e) {}
-    $tmp.remove();
-    notify("MAC " + mac + " copied");
   });
 });
 </script>
